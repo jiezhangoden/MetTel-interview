@@ -1,0 +1,6 @@
+**/bin/
+**/obj/
+**/target/
+**/__pycache__/
+**/*.pyc
+.dagster_home/

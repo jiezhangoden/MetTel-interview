@@ -1,0 +1,4 @@
+dagster==1.13.24
+dagster-webserver==1.13.24
+requests==2.32.5
+confluent-kafka==2.11.1

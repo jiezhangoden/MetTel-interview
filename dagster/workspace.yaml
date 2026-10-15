@@ -1,0 +1,4 @@
+load_from:
+  - python_module:
+      module_name: sdwan_orchestration.definitions
+      working_directory: /opt/dagster/app
