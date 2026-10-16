@@ -6,11 +6,13 @@
 
 All three hosts are fetched in parallel using `concurrent.futures.ThreadPoolExecutor` with one thread per host. All three requests fire at the same time, so total wall time is bounded by the slowest host (~3 minutes for host_3), not the sum (1+2+3=6 minutes). This fits within the 3-minute schedule window.
 
+The host list is discovered dynamically from `GET /vendor/hosts`, which returns each host's `devicesPath` and `delayMinutes`. We use `devicesPath` directly as the request URL (rather than constructing it ourselves) and set a per-host timeout of `(delayMinutes + 1) * 60` seconds — giving one minute of headroom over the expected delay.
+
 See: `dagster/sdwan_orchestration/vendor_client.py` → `fetch_all_hosts_parallel()`
 
 ### What happens when a run is still in progress and the next tick fires
 
-The job is tagged with `dagster/concurrency_key: network_poll`. Dagster's queue coordinator sees the concurrency key is already in use and queues the new run rather than launching it in parallel. Combined with `dagster/max_retries: 0`, at most one run is ever active at a time. The queued run starts immediately after the current one finishes.
+The job is tagged with `dagster/concurrency_key: network_poll` and `dagster/max_retries: 0`. The `dagster.yaml` file sets a `run_queue` tag concurrency limit of 1 for this key — this is what actually enforces the constraint at the daemon level. When the schedule fires a new tick while the previous run is still active, the queue coordinator sees the concurrency key is in use and holds the new run in the queue rather than launching it in parallel. The queued run starts immediately after the current one finishes. At most one run is ever active at a time.
 
 ### What you publish for a serial with no company row, and for a company row with no vendor edge
 
