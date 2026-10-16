@@ -1,6 +1,12 @@
 telemetry:
   enabled: false
 
+run_queue:
+  tag_concurrency_limits:
+    - key: "dagster/concurrency_key"
+      value: "network_poll"
+      limit: 1
+
 storage:
   sqlite:
     base_dir: /opt/dagster/dagster_home
